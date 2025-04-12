@@ -9,6 +9,7 @@ import requests
 from playwright.sync_api import sync_playwright
 
 load_dotenv()
+os.environ["SPOTIPY_DEBUG"] = "1"
 
 def try_download_with_browser(p, browser_type):
     print(f"🧪 Trying with: {browser_type.name}")
@@ -83,6 +84,7 @@ def update_playlist():
     print("🎧 playlist_id:", playlist_id)
 
     try:
+        print("🛰 プレイリスト情報取得中...")
         playlist_info = sp.playlist(playlist_id)
         print("📦 プレイリスト名:", playlist_info["name"])
     except SpotifyException as e:
