@@ -33,7 +33,7 @@ jobs:
     
     - name: Ensure browsers are installed
       run: |
-        python -m playwright install chromium --with-deps
+        playwright install --with-deps
 
     - name: Restore saved login session
       run: |
@@ -53,6 +53,7 @@ jobs:
       if: failure()
       run: |
         if [ -f debug.png ]; then
+          ls -la
           zip debug.zip debug.png
           echo "✅ Zipped debug.png"
           ls -la
@@ -61,7 +62,7 @@ jobs:
           git checkout -b debug-artifact
           git add debug.zip
           git commit -m "Add debug screenshot"
-          git push origin debug-artifact --force
+          git remote show origin > /dev/null 2>&1 || git remote add origin https://github.com/${{ github.repository }}.git
         else
           echo "❌ debug.png not found, skipping zip"
         fi
