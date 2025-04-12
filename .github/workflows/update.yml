@@ -5,18 +5,21 @@ on:
     - cron: '0 3 * * *'  # 毎日12:00 JST
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   update:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.10'
+        python-version: '3.11'
 
     - name: Install dependencies for Playwright
       run: |
@@ -26,8 +29,10 @@ jobs:
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install spotipy python-dotenv playwright
-        playwright install chromium --with-deps
+        pip install spotipy pandas python-dotenv playwright
+    
+    - name: Ensure browsers are installed
+        python -m playwright install chromium --with-deps
 
     - name: Restore saved login session
       run: |

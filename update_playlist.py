@@ -9,14 +9,14 @@ load_dotenv()
 
 def download_spotify_csv():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=False)
         context = browser.new_context(storage_state="state.json")
         page = context.new_page()
-        page.goto("https://charts.spotify.com/charts/view/viral-jp-daily/latest", timeout=240000)
+        page.goto("https://charts.spotify.com/charts/view/viral-jp-daily/latest", timeout=300000)
 
         try:
             # 安定したセレクタ + 長めのタイムアウト
-            page.locator('button[data-encore-id="buttonTertiary"]').first.wait_for(timeout=180000)
+            page.locator('button[data-encore-id="buttonTertiary"]').first.wait_for(timeout=300000)
 
             with page.expect_download() as download_info:
                 page.click('button[data-encore-id="buttonTertiary"] >> nth=0')
