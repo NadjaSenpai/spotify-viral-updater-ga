@@ -14,7 +14,7 @@ GitHub Actions で毎日更新できるようにしています。
 3. `save_session.py` をローカルで実行し、Spotify Charts にログイン → `state.json` が生成される
 4. `state.json` の内容を GitHub Secrets に `STATE_JSON` として追加
 5. 他の認証情報（Client ID/Secretなど）も同様に GitHub Secrets に追加
-6. `update.yml` が毎日12:00 JST に自動実行！
+6. `update.yml` が毎日12:00 JST に自動実行！  
    だそうです。
 
 `https://charts.spotify.com/charts/view/viral-jp-daily/latest` を別のチャートにしても動くと思います。

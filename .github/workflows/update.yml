@@ -43,6 +43,12 @@ jobs:
         SPOTIPY_REDIRECT_URI: ${{ secrets.SPOTIPY_REDIRECT_URI }}
         SPOTIFY_PLAYLIST_ID: ${{ secrets.SPOTIFY_PLAYLIST_ID }}
 
-    - name: Zip debug screenshot (manual fallback)
+    - name: Commit debug.zip to repo (as fallback)
       if: failure()
-      run: zip debug.zip debug.png
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git checkout -b debug-artifact
+        git add debug.zip
+        git commit -m "Add debug screenshot"
+        git push origin debug-artifact --force
