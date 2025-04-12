@@ -42,7 +42,7 @@ jobs:
         STATE_JSON: ${{ secrets.STATE_JSON }}
 
     - name: Run playlist update
-      run: python update_playlist.py
+      run: python update_playlist_multi.py
       env:
         SPOTIPY_CLIENT_ID: ${{ secrets.SPOTIPY_CLIENT_ID }}
         SPOTIPY_CLIENT_SECRET: ${{ secrets.SPOTIPY_CLIENT_SECRET }}

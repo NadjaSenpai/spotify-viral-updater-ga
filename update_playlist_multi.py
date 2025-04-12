@@ -17,8 +17,12 @@ def try_download_with_browser(browser_type):
 
     try:
         page.goto("https://charts.spotify.com/charts/view/viral-jp-daily/latest", timeout=60000)
+        page.wait_for_load_state("networkidle")  # ← 追加！
+
         page.evaluate("document.getElementById('onetrust-banner-sdk')?.remove()")
-        page.locator('button[data-encore-id="buttonTertiary"]').first.wait_for(timeout=15000)
+
+        # ボタンの出現を待機（タイムアウト長めに）
+        page.locator('button[data-encore-id="buttonTertiary"]').first.wait_for(timeout=30000)
 
         with page.expect_download() as download_info:
             page.locator('button[data-encore-id="buttonTertiary"]').first.click()
