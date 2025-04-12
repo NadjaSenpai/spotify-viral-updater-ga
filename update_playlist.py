@@ -12,10 +12,10 @@ def download_spotify_csv():
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(storage_state="state.json")
         page = context.new_page()
-        page.goto("https://charts.spotify.com/charts/view/viral-jp-daily/latest", timeout=90000)
+        page.goto("https://charts.spotify.com/charts/view/viral-jp-daily/latest", timeout=180000)
 
         # 安定したセレクタ + 長めのタイムアウト
-        page.wait_for_selector('button[data-encore-id="buttonTertiary"] >> nth=0', timeout=60000)
+        page.wait_for_selector('button[data-encore-id="buttonTertiary"] >> nth=0', timeout=120000)
 
         with page.expect_download() as download_info:
             page.click('button[data-encore-id="buttonTertiary"] >> nth=0')
