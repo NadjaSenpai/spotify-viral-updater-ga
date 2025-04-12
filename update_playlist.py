@@ -71,8 +71,18 @@ def update_playlist():
 
     playlist_id = os.getenv("SPOTIFY_PLAYLIST_ID")
     print("🎧 playlist_id:", playlist_id)
+
     me = sp.current_user()
-    print("👤 Spotify認証ユーザー:", me["display_name"], f"(id: {me['id']})")
+    me_id = me["id"]
+    print("👤 Spotify認証ユーザー:", me["display_name"], f"(id: {me_id})")
+
+    playlist_info = sp.playlist(playlist_id)
+    owner_id = playlist_info["owner"]["id"]
+    print("📦 プレイリスト所有者:", owner_id)
+
+    if me_id != owner_id:
+        print("🚫 プレイリストの所有者と認証ユーザーが一致しません。編集できない可能性があります。")
+        return
 
     results = sp.playlist_items(playlist_id)
     track_uris = [item["track"]["uri"] for item in results["items"]]
