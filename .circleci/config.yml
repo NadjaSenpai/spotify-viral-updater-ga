@@ -13,17 +13,17 @@ jobs:
       - checkout
 
       - run:
-          name: Install system deps for Playwright
-          command: |
-            sudo apt-get update
-            sudo apt-get install -y libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libxss1 libasound2 libxcomposite1 libxrandr2 libgbm-dev wget libxdamage1 libxkbcommon0      
-
-      - run:
           name: Install Python packages
           command: |
             python -m pip install --upgrade pip
             pip install spotipy python-dotenv playwright
             playwright install chromium
+
+      - run:
+          name: Install system deps for Playwright
+          command: |
+            sudo apt-get update
+            sudo playwright install-deps
 
       - run:
           name: Restore state.json
