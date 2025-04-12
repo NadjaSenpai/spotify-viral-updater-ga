@@ -3,6 +3,9 @@ import os
 from dotenv import load_dotenv
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyOAuth
+from spotipy.client import SpotifyException
+from requests.exceptions import RequestException
+import requests
 from playwright.sync_api import sync_playwright
 
 load_dotenv()
@@ -61,27 +64,35 @@ def update_playlist():
         print("❌ viral.csv が見つかりません。プレイリスト更新をスキップします。")
         return
 
+    class TimeoutSession(requests.Session):
+        def request(self, *args, **kwargs):
+            kwargs.setdefault("timeout", 10)
+            return super().request(*args, **kwargs)
+
+    session = TimeoutSession()
+
     sp = Spotify(auth_manager=SpotifyOAuth(
         scope="playlist-modify-public playlist-modify-private",
         client_id=os.getenv("SPOTIPY_CLIENT_ID"),
         client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
         redirect_uri=os.getenv("SPOTIPY_REDIRECT_URI"),
-    ))
+    ), requests_session=session)
     print("✅ Spotipy認証OK")
 
     playlist_id = os.getenv("SPOTIFY_PLAYLIST_ID")
     print("🎧 playlist_id:", playlist_id)
 
-    me = sp.current_user()
-    me_id = me["id"]
-    print("👤 Spotify認証ユーザー:", me["display_name"], f"(id: {me_id})")
-
-    playlist_info = sp.playlist(playlist_id)
-    owner_id = playlist_info["owner"]["id"]
-    print("📦 プレイリスト所有者:", owner_id)
-
-    if me_id != owner_id:
-        print("🚫 プレイリストの所有者と認証ユーザーが一致しません。編集できない可能性があります。")
+    try:
+        playlist_info = sp.playlist(playlist_id)
+        print("📦 プレイリスト名:", playlist_info["name"])
+    except SpotifyException as e:
+        print("❌ Spotify API エラー:", e)
+        return
+    except RequestException as e:
+        print("❌ リクエストタイムアウトや通信エラー:", e)
+        return
+    except Exception as e:
+        print("❌ その他のエラー:", e)
         return
 
     results = sp.playlist_items(playlist_id)
