@@ -24,8 +24,9 @@ def try_download_with_browser(browser_type):
         # ボタンの出現を待機
         page.locator('button[data-encore-id="buttonTertiary"]').first.wait_for(timeout=15000)
 
-        with page.expect_download() as download_info:
+        with page.expect_download(timeout=15000) as download_info:
             page.locator('button[data-encore-id="buttonTertiary"]').first.click()
+
 
         download = download_info.value
         download.save_as("viral.csv")
@@ -45,13 +46,15 @@ def try_download_with_browser(browser_type):
 
 def download_spotify_csv():
     with sync_playwright() as p:
-        if try_download_with_browser(p.chromium):
-            return
-        print("🔁 Chromium失敗 → Firefoxで再試行")
-        if try_download_with_browser(p.firefox):
-            return
-        print("🛑 Firefoxも失敗 → WebKitで再試行")
-        try_download_with_browser(p.webkit)
+        if not try_download_with_browser(p.chromium):
+            print("❌ Chromiumで失敗したので終了します")
+        # if try_download_with_browser(p.chromium):
+        #     return
+        # print("🔁 Chromium失敗 → Firefoxで再試行")
+        # if try_download_with_browser(p.firefox):
+        #     return
+        # print("🛑 Firefoxも失敗 → WebKitで再試行")
+        # try_download_with_browser(p.webkit)
 
 def update_playlist():
     if not os.path.exists("viral.csv"):
