@@ -1,0 +1,52 @@
+version: 2.1
+
+executors:
+  python-executor:
+    docker:
+      - image: cimg/python:3.11
+    working_directory: ~/project
+
+jobs:
+  update-spotify-playlist:
+    executor: python-executor
+    steps:
+      - checkout
+
+      - run:
+          name: Install system deps for Playwright
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libxss1 libasound2 libxcomposite1 libxrandr2 libgbm-dev wget
+
+      - run:
+          name: Install Python packages
+          command: |
+            python -m pip install --upgrade pip
+            pip install spotipy python-dotenv playwright
+            playwright install chromium
+
+      - run:
+          name: Restore state.json
+          command: echo "$CIRCLE_STATE_JSON" | base64 -d > state.json
+
+      - run:
+          name: Run playlist update
+          command: python update_playlist.py
+          environment:
+            SPOTIPY_CLIENT_ID: << pipeline.parameters.SPOTIPY_CLIENT_ID >>
+            SPOTIPY_CLIENT_SECRET: << pipeline.parameters.SPOTIPY_CLIENT_SECRET >>
+            SPOTIPY_REDIRECT_URI: << pipeline.parameters.SPOTIPY_REDIRECT_URI >>
+            SPOTIFY_PLAYLIST_ID: << pipeline.parameters.SPOTIFY_PLAYLIST_ID >>
+
+workflows:
+  version: 2
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 3 * * *"  # JST 12:00
+          filters:
+            branches:
+              only:
+                - main
+    jobs:
+      - update-spotify-playlist
