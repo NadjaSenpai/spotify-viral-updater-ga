@@ -21,7 +21,7 @@ jobs:
     - name: Install dependencies for Playwright
       run: |
         sudo apt-get update
-        sudo apt-get install -y libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libxss1 libasound2 libxcomposite1 libxrandr2 libgbm-dev
+        sudo apt-get install -y libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libxss1 libxcomposite1 libxrandr2 libgbm-dev
 
     - name: Install dependencies
       run: |
