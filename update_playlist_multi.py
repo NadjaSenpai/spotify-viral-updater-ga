@@ -54,6 +54,10 @@ def download_spotify_csv():
         try_download_with_browser(p.webkit)
 
 def update_playlist():
+    if not os.path.exists("viral.csv"):
+        print("❌ viral.csv が見つかりません。プレイリスト更新をスキップします。")
+        return
+
     sp = Spotify(auth_manager=SpotifyOAuth(
         scope="playlist-modify-public playlist-modify-private",
         client_id=os.getenv("SPOTIPY_CLIENT_ID"),
