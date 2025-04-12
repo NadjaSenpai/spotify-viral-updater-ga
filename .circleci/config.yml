@@ -9,6 +9,11 @@ executors:
 jobs:
   update-spotify-playlist:
     executor: python-executor
+    environment:
+      SPOTIPY_CLIENT_ID: $SPOTIPY_CLIENT_ID
+      SPOTIPY_CLIENT_SECRET: $SPOTIPY_CLIENT_SECRET
+      SPOTIPY_REDIRECT_URI: $SPOTIPY_REDIRECT_URI
+      SPOTIFY_PLAYLIST_ID: $SPOTIFY_PLAYLIST_ID
     steps:
       - checkout
 
@@ -32,24 +37,9 @@ jobs:
       - run:
           name: Run playlist update
           command: python update_playlist.py
-          environment:
-            SPOTIPY_CLIENT_ID: $SPOTIPY_CLIENT_ID
-            SPOTIPY_CLIENT_SECRET: $SPOTIPY_CLIENT_SECRET
-            SPOTIPY_REDIRECT_URI: $SPOTIPY_REDIRECT_URI
-            SPOTIFY_PLAYLIST_ID: $SPOTIFY_PLAYLIST_ID
 
 workflows:
   version: 2
-  on_demand:
-    jobs:
-      - update-spotify-playlist
-  nightly:
-    triggers:
-      - schedule:
-          cron: "0 3 * * *"  # JST 12:00
-          filters:
-            branches:
-              only:
-                - main
+  run-on-push:
     jobs:
       - update-spotify-playlist
