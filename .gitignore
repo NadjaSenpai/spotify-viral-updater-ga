@@ -1,5 +1,6 @@
 .spotify_token_cache
 state.json
+viral.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
