@@ -1,7 +1,7 @@
 # spotify-viral-updater
 ChatGPT といっしょに作りました。というか9割作ってもらった。  
 
-Spotify の [バイラルトップ50 - 日本 / Japan Viral 50](https://open.spotify.com/playlist/37i9dQZEVXbINTEnbFeb8d) をSoundiizなどで同期して  
+Spotify の [バイラルトップ50 - 日本 / Japan Viral 50](https://open.spotify.com/playlist/37i9dQZEVXbINTEnbFeb8d) を [Soundiiz](https://soundiiz.com/ja/) などで同期して  
 Apple Music などでも聴きたい！と思ったんですが、  
 バイラルチャートはチャートであってプレイリストではないためインポートできません。  
 というわけで、変換してプレイリストにするやつです。  
