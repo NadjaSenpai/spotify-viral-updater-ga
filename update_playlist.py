@@ -14,11 +14,18 @@ def download_spotify_csv():
         page = context.new_page()
         page.goto("https://charts.spotify.com/charts/view/viral-jp-daily/latest", timeout=240000)
 
-        # 安定したセレクタ + 長めのタイムアウト
-        page.locator('button[data-encore-id="buttonTertiary"]').first.wait_for(timeout=180000)
+        try:
+            # 安定したセレクタ + 長めのタイムアウト
+            page.locator('button[data-encore-id="buttonTertiary"]').first.wait_for(timeout=180000)
 
-        with page.expect_download() as download_info:
-            page.click('button[data-encore-id="buttonTertiary"] >> nth=0')
+            with page.expect_download() as download_info:
+                page.click('button[data-encore-id="buttonTertiary"] >> nth=0')
+
+        except Exception as e:
+            print("❌ ボタンの検出に失敗しました:", e)
+            page.screenshot(path="debug.png", full_page=True)
+            raise
+
         download = download_info.value
         download.save_as("viral.csv")
         browser.close()
