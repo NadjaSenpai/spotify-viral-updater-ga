@@ -9,11 +9,6 @@ executors:
 jobs:
   update-spotify-playlist:
     executor: python-executor
-    environment:
-      SPOTIPY_CLIENT_ID: $SPOTIPY_CLIENT_ID
-      SPOTIPY_CLIENT_SECRET: $SPOTIPY_CLIENT_SECRET
-      SPOTIPY_REDIRECT_URI: $SPOTIPY_REDIRECT_URI
-      SPOTIFY_PLAYLIST_ID: $SPOTIFY_PLAYLIST_ID
     steps:
       - checkout
 
