@@ -37,7 +37,7 @@ jobs:
 
     - name: Restore saved login session
       run: |
-        echo "$STATE_JSON" > state.json
+        echo "$STATE_JSON" | base64 -d > state.json
       env:
         STATE_JSON: ${{ secrets.STATE_JSON }}
 
