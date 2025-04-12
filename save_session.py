@@ -1,6 +1,7 @@
 from playwright.sync_api import sync_playwright
+import base64
 
-def save_login_state():
+def save_login_state_and_encode():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
         context = browser.new_context()
@@ -14,5 +15,11 @@ def save_login_state():
         browser.close()
         print("✅ ログインセッションを state.json に保存しました")
 
+        # base64 エンコードして出力
+        with open("state.json", "rb") as f:
+            encoded = base64.b64encode(f.read()).decode("utf-8")
+            print("\n👇 以下を GitHub の Secrets（STATE_JSON）に登録してください：\n")
+            print(encoded)
+
 if __name__ == "__main__":
-    save_login_state()
+    save_login_state_and_encode()
