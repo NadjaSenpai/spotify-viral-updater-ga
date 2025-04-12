@@ -1,2 +1,0 @@
-- name: Install Playwright dependencies
-  run: playwright install --with-deps
