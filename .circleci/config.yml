@@ -40,6 +40,9 @@ jobs:
 
 workflows:
   version: 2
+  on_demand:
+    jobs:
+      - update-spotify-playlist
   nightly:
     triggers:
       - schedule:
