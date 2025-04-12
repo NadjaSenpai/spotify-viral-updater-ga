@@ -46,9 +46,16 @@ jobs:
     - name: Commit debug.zip to repo (as fallback)
       if: failure()
       run: |
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
-        git checkout -b debug-artifact
-        git add debug.zip
-        git commit -m "Add debug screenshot"
-        git push origin debug-artifact --force
+        if [ -f debug.png ]; then
+          zip debug.zip debug.png
+          echo "✅ Zipped debug.png"
+          ls -la
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git checkout -b debug-artifact
+          git add debug.zip
+          git commit -m "Add debug screenshot"
+          git push origin debug-artifact --force
+        else
+          echo "❌ debug.png not found, skipping zip"
+        fi
