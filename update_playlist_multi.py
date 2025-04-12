@@ -16,13 +16,13 @@ def try_download_with_browser(browser_type):
     page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
     try:
-        page.goto("https://charts.spotify.com/charts/view/viral-jp-daily/latest", timeout=60000)
-        page.wait_for_load_state("networkidle")  # ← 追加！
+        page.goto("https://charts.spotify.com/charts/view/viral-jp-daily/latest", timeout=30000)
+        page.wait_for_load_state("domcontentloaded")
 
         page.evaluate("document.getElementById('onetrust-banner-sdk')?.remove()")
 
-        # ボタンの出現を待機（タイムアウト長めに）
-        page.locator('button[data-encore-id="buttonTertiary"]').first.wait_for(timeout=30000)
+        # ボタンの出現を待機
+        page.locator('button[data-encore-id="buttonTertiary"]').first.wait_for(timeout=15000)
 
         with page.expect_download() as download_info:
             page.locator('button[data-encore-id="buttonTertiary"]').first.click()
