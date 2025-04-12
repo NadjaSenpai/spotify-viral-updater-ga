@@ -7,26 +7,34 @@ from playwright.sync_api import sync_playwright
 
 load_dotenv()
 
-def try_download_with_browser(browser_type):
+def try_download_with_browser(p, browser_type):
     print(f"🧪 Trying with: {browser_type.name}")
     browser = browser_type.launch(headless=True)
-    context = browser.new_context(storage_state="state.json", accept_downloads=True)
+    context = browser.new_context(
+        storage_state="state.json",
+        accept_downloads=True,
+        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        locale="ja-JP",
+        timezone_id="Asia/Tokyo",
+        geolocation={"longitude": 139.6917, "latitude": 35.6895},
+        permissions=["geolocation"]
+    )
     page = context.new_page()
-
     page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
     try:
         page.goto("https://charts.spotify.com/charts/view/viral-jp-daily/latest", timeout=30000)
         page.wait_for_load_state("domcontentloaded")
-
         page.evaluate("document.getElementById('onetrust-banner-sdk')?.remove()")
 
-        # ボタンの出現を待機
-        page.locator('button[data-encore-id="buttonTertiary"]').first.wait_for(timeout=15000)
+        # ログイン済み判定
+        if not page.locator('img[alt="Avatar"]').is_visible(timeout=5000):
+            print("⚠️ ログインしていない状態です（state.json が期限切れの可能性）")
+            return False
 
+        page.locator('button[data-encore-id="buttonTertiary"]').first.wait_for(timeout=15000)
         with page.expect_download(timeout=15000) as download_info:
             page.locator('button[data-encore-id="buttonTertiary"]').first.click()
-
 
         download = download_info.value
         download.save_as("viral.csv")
@@ -46,15 +54,8 @@ def try_download_with_browser(browser_type):
 
 def download_spotify_csv():
     with sync_playwright() as p:
-        if not try_download_with_browser(p.chromium):
+        if not try_download_with_browser(p, p.chromium):
             print("❌ Chromiumで失敗したので終了します")
-        # if try_download_with_browser(p.chromium):
-        #     return
-        # print("🔁 Chromium失敗 → Firefoxで再試行")
-        # if try_download_with_browser(p.firefox):
-        #     return
-        # print("🛑 Firefoxも失敗 → WebKitで再試行")
-        # try_download_with_browser(p.webkit)
 
 def update_playlist():
     if not os.path.exists("viral.csv"):
