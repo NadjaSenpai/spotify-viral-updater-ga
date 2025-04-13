@@ -4,7 +4,8 @@ RUN apt-get update && apt-get install -y \
     wget unzip curl gnupg \
     libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 \
     libxss1 libasound2 libxcomposite1 libxrandr2 libgbm-dev \
-    libxdamage1 libxfixes3 libxkbcommon0 libpango-1.0-0 libcairo2 \
+    libxdamage1 libxfixes3 libxkbcommon0 \
+    libpango-1.0-0 libcairo2 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -12,4 +13,4 @@ COPY . /app
 
 RUN pip install --upgrade pip && pip install -r requirements.txt && playwright install chromium
 
-CMD ["sh", "-c", "playwright install chromium && echo OK && python update_playlist.py"]
+CMD ["sh", "-c", "echo '▶️ 起動中...' && python update_playlist.py"]

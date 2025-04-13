@@ -4,13 +4,11 @@ import base64
 from dotenv import load_dotenv
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyOAuth
-from spotipy.client import SpotifyException
-from requests.exceptions import RequestException
-import requests
 from playwright.sync_api import sync_playwright
 
+print("🚀 スクリプト起動")
+
 load_dotenv()
-os.environ["SPOTIPY_DEBUG"] = "1"
 
 def decode_state_json():
     encoded = os.getenv("STATE_JSON_B64")
@@ -23,104 +21,76 @@ def decode_state_json():
     print("✅ state.json を展開しました")
     return True
 
-def try_download_with_browser(p, browser_type):
-    print(f"🧪 Trying with: {browser_type.name}")
-    browser = browser_type.launch(headless=True)
-    context = browser.new_context(
-        storage_state="state.json",
-        accept_downloads=True,
-        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        locale="ja-JP",
-        timezone_id="Asia/Tokyo",
-        geolocation={"longitude": 139.6917, "latitude": 35.6895},
-        permissions=["geolocation"]
-    )
-    page = context.new_page()
-    page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-
-    try:
-        page.goto("https://charts.spotify.com/charts/view/viral-jp-daily/latest", timeout=30000)
-        page.wait_for_load_state("domcontentloaded")
-        page.evaluate("document.getElementById('onetrust-banner-sdk')?.remove()")
-
-        page.locator('button[data-encore-id="buttonTertiary"]').first.wait_for(timeout=15000)
-        with page.expect_download(timeout=15000) as download_info:
-            page.locator('button[data-encore-id="buttonTertiary"]').first.click()
-
-        download = download_info.value
-        download.save_as("viral.csv")
-        print("✅ CSVダウンロード完了: viral.csv")
-        return True
-
-    except Exception as e:
-        print(f"❌ {browser_type.name} failed:", e)
-        try:
-            page.screenshot(path=f"debug_{browser_type.name}.png", full_page=True)
-        except:
-            pass
-        return False
-
-    finally:
-        browser.close()
-
 def download_spotify_csv():
+    print("📥 CSV ダウンロード開始")
     with sync_playwright() as p:
-        if not try_download_with_browser(p, p.chromium):
-            print("❌ Chromiumで失敗したので終了します")
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context(
+            storage_state="state.json",
+            accept_downloads=True,
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            locale="ja-JP",
+            timezone_id="Asia/Tokyo",
+            geolocation={"longitude": 139.6917, "latitude": 35.6895},
+            permissions=["geolocation"]
+        )
+        page = context.new_page()
+        page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+
+        try:
+            page.goto("https://charts.spotify.com/charts/view/viral-jp-daily/latest", timeout=30000)
+            page.wait_for_load_state("domcontentloaded")
+            page.evaluate("document.getElementById('onetrust-banner-sdk')?.remove()")
+
+            page.locator('button[data-encore-id="buttonTertiary"]').first.wait_for(timeout=15000)
+            with page.expect_download(timeout=15000) as download_info:
+                page.locator('button[data-encore-id="buttonTertiary"]').first.click()
+
+            download = download_info.value
+            download.save_as("viral.csv")
+            print("✅ CSVダウンロード完了: viral.csv")
+
+        except Exception as e:
+            print("❌ CSV ダウンロード失敗:", e)
+            try:
+                page.screenshot(path="debug.png", full_page=True)
+            except:
+                pass
+        finally:
+            browser.close()
 
 def update_playlist():
-    print("🎯 環境変数チェック")
-    print("CLIENT_ID:", os.getenv("SPOTIPY_CLIENT_ID"))
-    print("PLAYLIST_ID:", os.getenv("SPOTIFY_PLAYLIST_ID"))
-
-    if not os.path.exists("viral.csv"):
-        print("❌ viral.csv が見つかりません。プレイリスト更新をスキップします。")
-        return
-
-    class TimeoutSession(requests.Session):
-        def request(self, *args, **kwargs):
-            kwargs.setdefault("timeout", 10)
-            return super().request(*args, **kwargs)
-
-    session = TimeoutSession()
-
+    print("🎯 Spotify API 認証処理開始")
     sp = Spotify(auth_manager=SpotifyOAuth(
         scope="playlist-modify-public playlist-modify-private",
         client_id=os.getenv("SPOTIPY_CLIENT_ID"),
         client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
         redirect_uri=os.getenv("SPOTIPY_REDIRECT_URI"),
-    ), requests_session=session)
-    print("✅ Spotipy認証OK")
+    ))
 
     playlist_id = os.getenv("SPOTIFY_PLAYLIST_ID")
     print("🎧 playlist_id:", playlist_id)
 
-    try:
-        print("🛰 プレイリスト情報取得中...")
-        playlist_info = sp.playlist(playlist_id)
-        print("📦 プレイリスト名:", playlist_info["name"])
-    except SpotifyException as e:
-        print("❌ Spotify API エラー:", e)
-        return
-    except RequestException as e:
-        print("❌ リクエストタイムアウトや通信エラー:", e)
-        return
-    except Exception as e:
-        print("❌ その他のエラー:", e)
+    if not os.path.exists("viral.csv"):
+        print("❌ viral.csv が見つかりません")
         return
 
-    results = sp.playlist_items(playlist_id)
-    track_uris = [item["track"]["uri"] for item in results["items"]]
+    # ✅ 既存の全トラック削除
+    print("🧹 既存トラックを取得中...")
+    results = sp.playlist_items(playlist_id, additional_types=['track'])
+    track_uris = [item["track"]["uri"] for item in results["items"] if item["track"]]
     if track_uris:
         sp.playlist_remove_all_occurrences_of_items(playlist_id, track_uris)
-        print(f"🧹 {len(track_uris)} 件のトラックを削除しました")
+        print(f"🗑️ {len(track_uris)} 件のトラックを削除しました")
 
+    # ✅ 新しいトラックをCSVから読み込んで追加
     with open("viral.csv", newline="", encoding="utf-8") as csvfile:
         reader = csv.DictReader(csvfile)
         uris = [row["uri"] for row in reader if row["uri"].startswith("spotify:track:")]
+    print("🎵 URI件数:", len(uris))
     if uris:
         sp.playlist_add_items(playlist_id, uris)
-        print(f"🎵 {len(uris)} 件のトラックをプレイリストに追加しました")
+        print(f"✅ {len(uris)} 件のトラックをプレイリストに追加しました")
 
 if __name__ == "__main__":
     if decode_state_json():
