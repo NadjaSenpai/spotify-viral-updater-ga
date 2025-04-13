@@ -1,4 +1,8 @@
 # 🎧 Spotify Japan Viral 50 Playlist Updater
+
+![Deploy Status](https://github.com/NadjaSenpai/spotify-viral-updater/actions/workflows/deploy.yml/badge.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Spotify Charts の「Daily Viral Songs Japan」を毎日取得し、指定した Spotify プレイリストを全自動で更新するスクリプトです。
 
 Spotify の [バイラルトップ50 - 日本 / Japan Viral 50](https://open.spotify.com/playlist/37i9dQZEVXbINTEnbFeb8d) を [Soundiiz](https://soundiiz.com/ja/) などで同期して  
