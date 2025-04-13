@@ -1,10 +1,8 @@
 {
   "build": {
-    "env": {
-      "PYTHONUNBUFFERED": "1"
-    }
+    "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "playwright install chromium && python update_playlist.py"
+    "startCommand": "python update_playlist.py"
   }
 }
