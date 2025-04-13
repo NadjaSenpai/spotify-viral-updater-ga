@@ -49,7 +49,6 @@ def try_download_with_browser(p, browser_type):
         download = download_info.value
         download.save_as("viral.csv")
         print("✅ CSVダウンロード完了: viral.csv")
-        cat viral.csv
         return True
 
     except Exception as e:
