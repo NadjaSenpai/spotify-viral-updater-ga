@@ -1,5 +1,6 @@
 import csv
 import os
+import base64
 from dotenv import load_dotenv
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyOAuth
