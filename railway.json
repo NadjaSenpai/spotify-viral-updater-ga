@@ -1,8 +1,0 @@
-{
-  "build": {
-    "dockerfilePath": "Dockerfile"
-  },
-  "deploy": {
-    "startCommand": "python update_playlist.py"
-  }
-}
