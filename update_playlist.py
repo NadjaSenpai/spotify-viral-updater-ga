@@ -11,6 +11,17 @@ from playwright.sync_api import sync_playwright
 load_dotenv()
 os.environ["SPOTIPY_DEBUG"] = "1"
 
+def decode_state_json():
+    encoded = os.getenv("STATE_JSON_B64")
+    if not encoded:
+        print("❌ STATE_JSON_B64 が定義されていません")
+        return False
+    decoded = base64.b64decode(encoded).decode("utf-8")
+    with open("state.json", "w", encoding="utf-8") as f:
+        f.write(decoded)
+    print("✅ state.json を展開しました")
+    return True
+
 def try_download_with_browser(p, browser_type):
     print(f"🧪 Trying with: {browser_type.name}")
     browser = browser_type.launch(headless=True)
@@ -38,6 +49,7 @@ def try_download_with_browser(p, browser_type):
         download = download_info.value
         download.save_as("viral.csv")
         print("✅ CSVダウンロード完了: viral.csv")
+        cat viral.csv
         return True
 
     except Exception as e:
@@ -111,5 +123,6 @@ def update_playlist():
         print(f"🎵 {len(uris)} 件のトラックをプレイリストに追加しました")
 
 if __name__ == "__main__":
-    download_spotify_csv()
-    update_playlist()
+    if decode_state_json():
+        download_spotify_csv()
+        update_playlist()
