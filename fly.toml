@@ -1,0 +1,18 @@
+# fly.toml app configuration file generated for spotify-playlist-updater on 2025-04-13T12:34:29+09:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'spotify-viral-updater'
+primary_region = 'hkg'
+
+[build]
+  dockerfile = 'Dockerfile'
+
+[env]
+  PORT = '8080'
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1

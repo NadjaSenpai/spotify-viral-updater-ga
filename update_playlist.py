@@ -59,14 +59,28 @@ def download_spotify_csv():
         finally:
             browser.close()
 
-def update_playlist():
-    print("🎯 Spotify API 認証処理開始")
-    sp = Spotify(auth_manager=SpotifyOAuth(
-        scope="playlist-modify-public playlist-modify-private",
+def get_spotify_client():
+    refresh_token = os.getenv("SPOTIFY_REFRESH_TOKEN")
+    if not refresh_token:
+        print("❌ SPOTIFY_REFRESH_TOKEN が未設定です")
+        exit(1)
+
+    auth_manager = SpotifyOAuth(
         client_id=os.getenv("SPOTIPY_CLIENT_ID"),
         client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
         redirect_uri=os.getenv("SPOTIPY_REDIRECT_URI"),
-    ))
+    )
+
+    try:
+        token_info = auth_manager.refresh_access_token(refresh_token)
+        return Spotify(auth=token_info["access_token"])
+    except Exception as e:
+        print("❌ アクセストークンの取得に失敗しました:", e)
+        exit(1)
+        
+def update_playlist():
+    print("🎯 Spotify API 認証処理開始")
+    sp = get_spotify_client()
 
     playlist_id = os.getenv("SPOTIFY_PLAYLIST_ID")
     print("🎧 playlist_id:", playlist_id)
@@ -75,9 +89,9 @@ def update_playlist():
         print("❌ viral.csv が見つかりません")
         return
 
-    # ✅ 既存の全トラック削除
+    # ✅ 既存のトラックを削除
     print("🧹 既存トラックを取得中...")
-    results = sp.playlist_items(playlist_id, additional_types=['track'])
+    results = sp.playlist_items(playlist_id)
     track_uris = [item["track"]["uri"] for item in results["items"] if item["track"]]
     if track_uris:
         sp.playlist_remove_all_occurrences_of_items(playlist_id, track_uris)
