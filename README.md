@@ -2,6 +2,7 @@
 
 ![Deploy Status](https://github.com/NadjaSenpai/spotify-viral-updater/actions/workflows/deploy.yml/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Python](https://img.shields.io/badge/Python-3.6%2B-blue)
 
 Spotify Charts の「Daily Viral Songs Japan」を毎日取得し、指定した Spotify プレイリストを全自動で更新するスクリプトです。
 
