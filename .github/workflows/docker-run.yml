@@ -1,0 +1,23 @@
+name: Run Spotify Updater (via Docker)
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # 毎日12:00 JST
+  workflow_dispatch:
+
+jobs:
+  run-updater:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t spotify-updater .
+
+      - name: Run updater container
+        run: |
+          echo "$STATE_JSON_B64" | base64 -d > state.json
+          docker run --rm             -e SPOTIPY_CLIENT_ID=${{ secrets.SPOTIPY_CLIENT_ID }}             -e SPOTIPY_CLIENT_SECRET=${{ secrets.SPOTIPY_CLIENT_SECRET }}             -e SPOTIPY_REDIRECT_URI=${{ secrets.SPOTIPY_REDIRECT_URI }}             -e SPOTIFY_REFRESH_TOKEN=${{ secrets.SPOTIFY_REFRESH_TOKEN }}             -e SPOTIFY_PLAYLIST_ID=${{ secrets.SPOTIFY_PLAYLIST_ID }}             -v ${{ github.workspace }}/state.json:/app/state.json             spotify-updater
+        env:
+          STATE_JSON_B64: ${{ secrets.STATE_JSON_B64 }}
