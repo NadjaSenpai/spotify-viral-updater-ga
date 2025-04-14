@@ -2,7 +2,7 @@ name: Run Spotify Updater (via Docker)
 
 on:
   schedule:
-    - cron: '0 3 * * *'  # 毎日12:00 JST
+    - cron: '0 0 * * *'  # 毎日9:00 JST
   workflow_dispatch:
 
 jobs:
@@ -18,6 +18,11 @@ jobs:
       - name: Run updater container
         run: |
           echo "$STATE_JSON_B64" | base64 -d > state.json
-          docker run --rm             -e SPOTIPY_CLIENT_ID=${{ secrets.SPOTIPY_CLIENT_ID }}             -e SPOTIPY_CLIENT_SECRET=${{ secrets.SPOTIPY_CLIENT_SECRET }}             -e SPOTIPY_REDIRECT_URI=${{ secrets.SPOTIPY_REDIRECT_URI }}             -e SPOTIFY_REFRESH_TOKEN=${{ secrets.SPOTIFY_REFRESH_TOKEN }}             -e SPOTIFY_PLAYLIST_ID=${{ secrets.SPOTIFY_PLAYLIST_ID }}             -v ${{ github.workspace }}/state.json:/app/state.json             spotify-updater
-        env:
-          STATE_JSON_B64: ${{ secrets.STATE_JSON_B64 }}
+          docker run --rm \
+  -e SPOTIPY_CLIENT_ID=${{ secrets.SPOTIPY_CLIENT_ID }} \
+  -e SPOTIPY_CLIENT_SECRET=${{ secrets.SPOTIPY_CLIENT_SECRET }} \
+  -e SPOTIPY_REDIRECT_URI=${{ secrets.SPOTIPY_REDIRECT_URI }} \
+  -e SPOTIFY_REFRESH_TOKEN=${{ secrets.SPOTIFY_REFRESH_TOKEN }} \
+  -e SPOTIFY_PLAYLIST_ID=${{ secrets.SPOTIFY_PLAYLIST_ID }} \
+  -e STATE_JSON_B64="${{ secrets.STATE_JSON_B64 }}" \
+  spotify-updater
