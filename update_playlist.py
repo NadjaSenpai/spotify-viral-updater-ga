@@ -6,23 +6,23 @@ from spotipy import Spotify
 from spotipy.oauth2 import SpotifyOAuth
 from playwright.sync_api import sync_playwright
 
-print("🚀 スクリプト起動")
+print("Starting script...")
 
 load_dotenv()
 
 def decode_state_json():
     encoded = os.getenv("STATE_JSON_B64")
     if not encoded:
-        print("❌ STATE_JSON_B64 が定義されていません")
+        print("STATE_JSON_B64 is not defined.")
         return False
     decoded = base64.b64decode(encoded).decode("utf-8")
     with open("state.json", "w", encoding="utf-8") as f:
         f.write(decoded)
-    print("✅ state.json を展開しました")
+    print("state.json extracted.")
     return True
 
 def download_spotify_csv():
-    print("📥 CSV ダウンロード開始")
+    print("Downloading CSV from Spotify Charts...")
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(
@@ -41,17 +41,14 @@ def download_spotify_csv():
             page.goto("https://charts.spotify.com/charts/view/viral-jp-daily/latest", timeout=30000)
             page.wait_for_load_state("domcontentloaded")
             page.evaluate("document.getElementById('onetrust-banner-sdk')?.remove()")
-
             page.locator('button[data-encore-id="buttonTertiary"]').first.wait_for(timeout=15000)
             with page.expect_download(timeout=15000) as download_info:
                 page.locator('button[data-encore-id="buttonTertiary"]').first.click()
-
             download = download_info.value
             download.save_as("viral.csv")
-            print("✅ CSVダウンロード完了: viral.csv")
-
+            print("CSV downloaded: viral.csv")
         except Exception as e:
-            print("❌ CSV ダウンロード失敗:", e)
+            print("CSV download failed:", e)
             try:
                 page.screenshot(path="debug.png", full_page=True)
             except:
@@ -62,7 +59,7 @@ def download_spotify_csv():
 def get_spotify_client():
     refresh_token = os.getenv("SPOTIFY_REFRESH_TOKEN")
     if not refresh_token:
-        print("❌ SPOTIFY_REFRESH_TOKEN が未設定です")
+        print("SPOTIFY_REFRESH_TOKEN is not set.")
         exit(1)
 
     auth_manager = SpotifyOAuth(
@@ -75,36 +72,34 @@ def get_spotify_client():
         token_info = auth_manager.refresh_access_token(refresh_token)
         return Spotify(auth=token_info["access_token"])
     except Exception as e:
-        print("❌ アクセストークンの取得に失敗しました:", e)
+        print("Failed to get access token:", e)
         exit(1)
-        
+
 def update_playlist():
-    print("🎯 Spotify API 認証処理開始")
+    print("Authenticating with Spotify API...")
     sp = get_spotify_client()
 
     playlist_id = os.getenv("SPOTIFY_PLAYLIST_ID")
-    print("🎧 playlist_id:", playlist_id)
+    print("playlist_id:", playlist_id)
 
     if not os.path.exists("viral.csv"):
-        print("❌ viral.csv が見つかりません")
+        print("viral.csv not found.")
         return
 
-    # ✅ 既存のトラックを削除
-    print("🧹 既存トラックを取得中...")
+    print("Fetching current playlist tracks...")
     results = sp.playlist_items(playlist_id)
     track_uris = [item["track"]["uri"] for item in results["items"] if item["track"]]
     if track_uris:
         sp.playlist_remove_all_occurrences_of_items(playlist_id, track_uris)
-        print(f"🗑️ {len(track_uris)} 件のトラックを削除しました")
+        print(f"Removed {len(track_uris)} track(s) from the playlist.")
 
-    # ✅ 新しいトラックをCSVから読み込んで追加
     with open("viral.csv", newline="", encoding="utf-8") as csvfile:
         reader = csv.DictReader(csvfile)
         uris = [row["uri"] for row in reader if row["uri"].startswith("spotify:track:")]
-    print("🎵 URI件数:", len(uris))
+    print("Number of URIs to add:", len(uris))
     if uris:
         sp.playlist_add_items(playlist_id, uris)
-        print(f"✅ {len(uris)} 件のトラックをプレイリストに追加しました")
+        print(f"Added {len(uris)} track(s) to the playlist.")
 
 if __name__ == "__main__":
     if decode_state_json():

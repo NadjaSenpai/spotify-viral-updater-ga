@@ -8,17 +8,16 @@ def save_login_state_and_encode():
         page = context.new_page()
         page.goto("https://charts.spotify.com")
 
-        print("✅ ログインして 'ダウンロード' ボタンが表示されるまで、手動で操作してね")
-        input("ログイン完了後にEnterを押して続行...")
+        print("Log in manually and wait for the 'Download' button to appear.")
+        input("Press Enter after login is complete...")
 
         context.storage_state(path="state.json")
         browser.close()
-        print("✅ ログインセッションを state.json に保存しました")
+        print("Saved session to state.json")
 
-        # base64 エンコードして出力
         with open("state.json", "rb") as f:
             encoded = base64.b64encode(f.read()).decode("utf-8")
-            print("\n👇 以下を GitHub の Secrets（STATE_JSON）に登録してください：\n")
+            print("\nCopy the following and add it to your secrets as STATE_JSON_B64:\n")
             print(encoded)
 
 if __name__ == "__main__":

@@ -12,10 +12,12 @@ sp_oauth = SpotifyOAuth(
 )
 
 auth_url = sp_oauth.get_authorize_url()
-print("🔗 下記URLで認証してください:\n", auth_url)
+print("Open this URL to authorize:
+", auth_url)
 
-response = input("🔑 リダイレクト先URLを貼ってください: ")
+response = input("Paste the redirected URL here: ")
 
 code = sp_oauth.parse_response_code(response)
 token_info = sp_oauth.get_access_token(code)
-print("✅ refresh_token:", token_info["refresh_token"])
+print("Your refresh_token is:
+", token_info["refresh_token"])
