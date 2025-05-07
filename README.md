@@ -16,7 +16,7 @@ https://github.com/NadjaSenpai/spotify-viral-updater
 DockerならGitHub Actionsだけでもいけるじゃん、って気づいてしまったので  
 現在は GitHub Actions + Docker のみで毎日自動更新しています。
 
-ChatGPT といっしょに作りました。というか 95% ぐらい作ってもらった。
+ChatGPT といっしょに作りました。
 
 `https://charts.spotify.com/charts/view/viral-jp-daily/latest` を別のチャートにしても動作します。
 
